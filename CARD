@@ -1,0 +1,3330 @@
+import streamlit as st
+import random
+import uuid
+
+st.set_page_config(layout="wide")
+
+# =====================
+# CONFIG
+# =====================
+NIVEL_MAX = 20
+LIMITE = {"A": 3, "B": 3}
+
+CLASSES = {
+    1: "Canalizador",
+    2: "Curador",
+    3: "Imperial",
+    4: "Materializador",
+    5: "Nictomante",
+    6: "Onirista",
+    7: "Simpatista",
+    8: "Wit",
+    9: "Ylerista"
+}
+
+POOL_FIXO = {1, 3, 4, 7, 9}
+
+# =====================
+# CARTAS BASE
+# =====================
+BASE_A = [
+    {
+        "nome": "Abelha",
+        "descricao": "Se for de dia, voo de 3 quadrados. Essa carta é inútil durante a noite.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/abelha2.png?raw=true"
+    },
+    {
+        "nome": "Abelha",
+        "descricao": "Se for de dia, voo de 3 quadrados. Essa carta é inútil durante a noite.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/abelha2.png?raw=true"
+    },
+{
+        "nome": "Acrobata",
+        "descricao": "Se teletransporta para um local aleatório no campo de batalha.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/acrobata1.png?raw=true"
+    },
+{
+        "nome": "Arcebispo",
+        "descricao": "Movimento de apenas um quadrado na diagonal. Todos os aliados adjacentes ganham uma carta de bispo.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/arcebispo1.png?raw=true"
+    },
+{
+        "nome": "Atleta",
+        "descricao": "Movimento de três quadrados em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/atleta2.png?raw=true"
+    },
+{
+        "nome": "Atleta",
+        "descricao": "Movimento de três quadrados em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/atleta2.png?raw=true"
+    },
+{
+        "nome": "Bispo",
+        "descricao": "Movimento de até 3 casas nas direções diagonais.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/bispo2.png?raw=true"
+    },
+{
+        "nome": "Bispo",
+        "descricao": "Movimento de até 3 casas nas direções diagonais.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/bispo2.png?raw=true"
+    },
+{
+        "nome": "Bobo da Corte",
+        "descricao": "Troca toda as criaturas randomicamente de lugar, incluindo a si próprio. Para cada criatura deslocada, ganha um quadrado de deslocamento livre.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/bobodacorte1.png?raw=true"
+    },
+{
+        "nome": "Bruxa",
+        "descricao": "Voo de três quadrados em qualquer direção. ",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/bruxa2.png?raw=true"
+    },
+{
+        "nome": "Bruxa",
+        "descricao": "Voo de três quadrados em qualquer direção. ",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/bruxa2.png?raw=true"
+    },
+    {
+        "nome": "Camelo",
+        "descricao": "Movimento em forma de L, formado por 4 quadrados, três retos e um para a direita ou a esquerda.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/camelo2.png?raw=true"
+    },
+{
+        "nome": "Camelo",
+        "descricao": "Movimento em forma de L, formado por 4 quadrados, três retos e um para a direita ou a esquerda.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/camelo2.png?raw=true"
+    },
+{
+        "nome": "Carroça",
+        "descricao": "Movimento na direção horizontal ou vertical. Se move até atingir um obstáculo ou o fim do campo de batalha. Qualquer um no caminho é atropelado e deve fazer um TDR de FOR para não cair.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/carroca1.png?raw=true"
+    },
+{
+        "nome": "Cavaleiro",
+        "descricao": "Movimento de dois quadrados na vertical ou horizontal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cavaleiro3.png?raw=true"
+    },
+{
+        "nome": "Cavaleiro",
+        "descricao": "Movimento de dois quadrados na vertical ou horizontal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cavaleiro3.png?raw=true"
+    },
+{
+        "nome": "Cavaleiro",
+        "descricao": "Movimento de dois quadrados na vertical ou horizontal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cavaleiro3.png?raw=true"
+    },
+{
+        "nome": "Cavalo",
+        "descricao": "Movimento em forma de L formado por 3 quadrados, dois retos e um para a direita ou a esquerda.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cavalo3.png?raw=true"
+    },
+{
+        "nome": "Cavalo",
+        "descricao": "Movimento em forma de L formado por 3 quadrados, dois retos e um para a direita ou a esquerda.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cavalo3.png?raw=true"
+    },
+{
+        "nome": "Cavalo",
+        "descricao": "Movimento em forma de L formado por 3 quadrados, dois retos e um para a direita ou a esquerda.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cavalo3.png?raw=true"
+    },
+{
+        "nome": "Caçador",
+        "descricao": "Movimento de três quadrados em qualquer direção, pode botar uma armadilha que encerra o deslocamento em um dos quadrados que passou.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/ca%C3%A7ador2.png?raw=true"
+    },
+    {
+        "nome": "Caçador",
+        "descricao": "Movimento de três quadrados em qualquer direção, pode botar uma armadilha que encerra o deslocamento em um dos quadrados que passou.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/ca%C3%A7ador2.png?raw=true"
+    },
+{
+        "nome": "Cruzado",
+        "descricao": "Movimenta o quanto quiser para a vertical ou horizontal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cruzado1.png?raw=true"
+    },
+{
+        "nome": "Dançarino",
+        "descricao": "Movimento de quatro quadrados em qualquer direção, podendo fazer curvas.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/dancarino1.png?raw=true"
+    },
+{
+        "nome": "Diácono",
+        "descricao": "Movimento de quatro quadrados na horizontal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/diacono1.png?raw=true"
+    },
+{
+        "nome": "Duelista",
+        "descricao": "Se em uma linha livre até um oponente, pode ir parar no quadrado adjacente a ele ou entrar em Confronto.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/duelista2.png?raw=true"
+    },
+{
+        "nome": "Duelista",
+        "descricao": "Se em uma linha livre até um oponente, pode ir parar no quadrado adjacente a ele ou entrar em Confronto.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/duelista2.png?raw=true"
+    },
+{
+        "nome": "Elefante",
+        "descricao": "Movimento de dois quadrados na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/elefante3.png?raw=true"
+    },
+{
+        "nome": "Elefante",
+        "descricao": "Movimento de dois quadrados na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/elefante3.png?raw=true"
+    },
+{
+        "nome": "Elefante",
+        "descricao": "Movimento de dois quadrados na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/elefante3.png?raw=true"
+    },
+{
+        "nome": "Escudeiro",
+        "descricao": "Movimento de um quadrado, na vertical ou na horizontal. Se parar ao lado de um aliado, ganha a carta Cavaleiro.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/escudeiro6.png?raw=true"
+    },
+    {
+        "nome": "Escudeiro",
+        "descricao": "Movimento de um quadrado, na vertical ou na horizontal. Se parar ao lado de um aliado, ganha a carta Cavaleiro.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/escudeiro6.png?raw=true"
+    },
+{
+        "nome": "Escudeiro",
+        "descricao": "Movimento de um quadrado, na vertical ou na horizontal. Se parar ao lado de um aliado, ganha a carta Cavaleiro.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/escudeiro6.png?raw=true"
+    },
+{
+        "nome": "Escudeiro",
+        "descricao": "Movimento de um quadrado, na vertical ou na horizontal. Se parar ao lado de um aliado, ganha a carta Cavaleiro.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/escudeiro6.png?raw=true"
+    },
+{
+        "nome": "Escudeiro",
+        "descricao": "Movimento de um quadrado, na vertical ou na horizontal. Se parar ao lado de um aliado, ganha a carta Cavaleiro.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/escudeiro6.png?raw=true"
+    },
+{
+        "nome": "Escudeiro",
+        "descricao": "Movimento de um quadrado, na vertical ou na horizontal. Se parar ao lado de um aliado, ganha a carta Cavaleiro.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/escudeiro6.png?raw=true"
+    },
+{
+        "nome": "Estrategista",
+        "descricao": "Força um alvo a usar uma carta de movimentação como uma ação livre.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/estrategista1.png?raw=true"
+    },
+{
+        "nome": "Estudante",
+        "descricao": "Imita o efeito da última carta de movimentação utilizada na batalha. Não pode ser usada como primeiro movimento da batalha.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/estudante2.png?raw=true"
+    },
+{
+        "nome": "Estudante",
+        "descricao": "Imita o efeito da última carta de movimentação utilizada na batalha. Não pode ser usada como primeiro movimento da batalha.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/estudante2.png?raw=true"
+    },
+{
+        "nome": "Falcão",
+        "descricao": "Voo na vertical ou horizontal, por 3 quadrados.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/falcao2.png?raw=true"
+    },
+{
+        "nome": "Falcão",
+        "descricao": "Voo na vertical ou horizontal, por 3 quadrados.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/falcao2.png?raw=true"
+    },
+    {
+        "nome": "General",
+        "descricao": "Movimento de quatro quadrados na vertical ou horizontal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/general1.png?raw=true"
+    },
+{
+        "nome": "Herói",
+        "descricao": "Movimenta apenas um quadrado em qualquer direção. Todos os aliados adjacentes ganham uma carta extra de Atleta.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/heroi2.png?raw=true"
+    },
+{
+        "nome": "Herói",
+        "descricao": "Movimenta apenas um quadrado em qualquer direção. Todos os aliados adjacentes ganham uma carta extra de Atleta.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/heroi2.png?raw=true"
+    },
+{
+        "nome": "Homem",
+        "descricao": "Movimento de dois quadrados em qualquer direção, sem direito a curvas.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/homem3.png?raw=true"
+    },
+{
+        "nome": "Homem",
+        "descricao": "Movimento de dois quadrados em qualquer direção, sem direito a curvas.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/homem3.png?raw=true"
+    },
+{
+        "nome": "Homem",
+        "descricao": "Movimento de dois quadrados em qualquer direção, sem direito a curvas.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/homem3.png?raw=true"
+    },
+{
+        "nome": "Ilusionista",
+        "descricao": "Desfaz o último movimento de um alvo qualquer. O movimento desfeito se torna o movimento dessa carta.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/ilusionista2.png?raw=true"
+    },
+{
+        "nome": "Ilusionista",
+        "descricao": "Desfaz o último movimento de um alvo qualquer. O movimento desfeito se torna o movimento dessa carta.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/ilusionista2.png?raw=true"
+    },
+{
+        "nome": "Ladrão",
+        "descricao": "Movimento de três quadrados em qualquer direção, se parar adjacente a uma criatura com carta de movimentação, ganha uma igual. Se possuir mais de uma, pega uma aleatória.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/ladrao2.png?raw=true"
+    },
+{
+        "nome": "Ladrão",
+        "descricao": "Movimento de três quadrados em qualquer direção, se parar adjacente a uma criatura com carta de movimentação, ganha uma igual. Se possuir mais de uma, pega uma aleatória.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/ladrao2.png?raw=true"
+    },
+    {
+        "nome": "Lobisomem",
+        "descricao": "Se for de dia, movimento de dois quadrados em qualquer direção, se for de noite, movimento de 5.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/lobisomem2.png?raw=true"
+    },
+{
+        "nome": "Lobisomem",
+        "descricao": "Se for de dia, movimento de dois quadrados em qualquer direção, se for de noite, movimento de 5.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/lobisomem2.png?raw=true"
+    },
+{
+        "nome": "Mago",
+        "descricao": "Se teletransporta para algum local desocupado que possa ver.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mago1.png?raw=true"
+    },
+{
+        "nome": "Malabarista",
+        "descricao": "Troca duas criaturas aleatórias de lugar. Se trocar um oponente com um aliado, ganha 3 quadrados de deslocamento livre.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/malabarista1.png?raw=true"
+    },
+{
+        "nome": "Mestre",
+        "descricao": "Realoque todos que quiser da forma que quiser dentro do campo de batalha, respeitando o espaço físico.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mestre1.png?raw=true"
+    },
+{
+        "nome": "Morcego",
+        "descricao": "Se for de noite, voo de 3 quadrados. Essa carta é inútil durante o dia.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/morcego2.png?raw=true"
+    },
+{
+        "nome": "Morcego",
+        "descricao": "Se for de noite, voo de 3 quadrados. Essa carta é inútil durante o dia.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/morcego2.png?raw=true"
+    },
+{
+        "nome": "Mulher",
+        "descricao": "Movimento de dois quadrados em qualquer direção, podendo fazer curvas.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mulher3.png?raw=true"
+    },
+{
+        "nome": "Mulher",
+        "descricao": "Movimento de dois quadrados em qualquer direção, podendo fazer curvas.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mulher3.png?raw=true"
+    },
+{
+        "nome": "Mulher",
+        "descricao": "Movimento de dois quadrados em qualquer direção, podendo fazer curvas.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mulher3.png?raw=true"
+    },
+    {
+        "nome": "Múmia",
+        "descricao": "Se for de dia, movimenta o quanto quiser em qualquer direção. Essa carta é inútil durante a noite.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mumia1.png?raw=true"
+    },
+{
+        "nome": "Oportunista",
+        "descricao": "Troca as cartas de movimentação de um aliado com um oponente. Ganha uma igual a que o aliado receber. Se receber mais de uma, é decidido aleatoriamente.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oportunista1.png?raw=true"
+    },
+{
+        "nome": "Padre",
+        "descricao": "Movimento de um quadrado na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/padre8.png?raw=true"
+    },
+{
+        "nome": "Padre",
+        "descricao": "Movimento de um quadrado na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/padre8.png?raw=true"
+    },
+{
+        "nome": "Padre",
+        "descricao": "Movimento de um quadrado na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/padre8.png?raw=true"
+    },
+{
+        "nome": "Padre",
+        "descricao": "Movimento de um quadrado na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/padre8.png?raw=true"
+    },
+{
+        "nome": "Padre",
+        "descricao": "Movimento de um quadrado na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/padre8.png?raw=true"
+    },
+{
+        "nome": "Padre",
+        "descricao": "Movimento de um quadrado na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/padre8.png?raw=true"
+    },
+{
+        "nome": "Padre",
+        "descricao": "Movimento de um quadrado na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/padre8.png?raw=true"
+    },
+{
+        "nome": "Padre",
+        "descricao": "Movimento de um quadrado na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/padre8.png?raw=true"
+    },
+    {
+        "nome": "Palhaço",
+        "descricao": "Não movimenta nenhum quadrado. Ao invés disso, faz todos se movimentarem 2 quadrados em direção a uma quina do campo de batalha a sua escolha.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/palhaco1.png?raw=true"
+    },
+{
+        "nome": "Papa",
+        "descricao": "Movimento o quanto quiser na diagonal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/papa1.png?raw=true"
+    },
+{
+        "nome": "Pássaro",
+        "descricao": "Voo na vertical ou horizontal, por 2 quadrados.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/passaro3.png?raw=true"
+    },
+{
+        "nome": "Pássaro",
+        "descricao": "Voo na vertical ou horizontal, por 2 quadrados.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/passaro3.png?raw=true"
+    },
+{
+        "nome": "Pássaro",
+        "descricao": "Voo na vertical ou horizontal, por 2 quadrados.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/passaro3.png?raw=true"
+    },
+{
+        "nome": "Peão",
+        "descricao": "Movimento de um quadrado, em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/peao8.png?raw=true"
+    },
+{
+        "nome": "Peão",
+        "descricao": "Movimento de um quadrado, em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/peao8.png?raw=true"
+    },
+{
+        "nome": "Peão",
+        "descricao": "Movimento de um quadrado, em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/peao8.png?raw=true"
+    },
+{
+        "nome": "Peão",
+        "descricao": "Movimento de um quadrado, em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/peao8.png?raw=true"
+    },
+{
+        "nome": "Peão",
+        "descricao": "Movimento de um quadrado, em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/peao8.png?raw=true"
+    },
+    {
+        "nome": "Peão",
+        "descricao": "Movimento de um quadrado, em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/peao8.png?raw=true"
+    },
+{
+        "nome": "Peão",
+        "descricao": "Movimento de um quadrado, em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/peao8.png?raw=true"
+    },
+{
+        "nome": "Peão",
+        "descricao": "Movimento de um quadrado, em qualquer direção.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/peao8.png?raw=true"
+    },
+{
+        "nome": "Pégaso",
+        "descricao": "Voo em forma de L, formado por 4 quadrados, pelo menos três retos e um para a direita ou a esquerda.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/pegaso1.png?raw=true"
+    },
+{
+        "nome": "Rainha",
+        "descricao": "Movimenta o quanto quiser em apenas uma direção qualquer.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/rainha1.png?raw=true"
+    },
+{
+        "nome": "Rei",
+        "descricao": "Movimenta o quanto quiser em uma direção qualquer, ignorando obstáculos.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/rei1.png?raw=true"
+    },
+{
+        "nome": "Sacrifício",
+        "descricao": "Movimento de um quadrado em qualquer direção, ou pode ser sacrificado para no próximo turno adicionar +1 quadrado de deslocamento a uma carta sua.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/sacrificio3.png?raw=true"
+    },
+{
+        "nome": "Sacrifício",
+        "descricao": "Movimento de um quadrado em qualquer direção, ou pode ser sacrificado para no próximo turno adicionar +1 quadrado de deslocamento a uma carta sua.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/sacrificio3.png?raw=true"
+    },
+{
+        "nome": "Sacrifício",
+        "descricao": "Movimento de um quadrado em qualquer direção, ou pode ser sacrificado para no próximo turno adicionar +1 quadrado de deslocamento a uma carta sua.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/sacrificio3.png?raw=true"
+    },
+{
+        "nome": "Sonâmbulo",
+        "descricao": "Se for de noite, movimento de dois quadrados em qualquer direção, se for de dia, ande 5.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/sonambulo2.png?raw=true"
+    },
+    {
+        "nome": "Sonâmbulo",
+        "descricao": "Se for de noite, movimento de dois quadrados em qualquer direção, se for de dia, ande 5.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/sonambulo2.png?raw=true"
+    },
+{
+        "nome": "Torre",
+        "descricao": "Movimento de até 3 casas nas direções vertical ou horizontal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/torre2.png?raw=true"
+    },
+{
+        "nome": "Torre",
+        "descricao": "Movimento de até 3 casas nas direções vertical ou horizontal.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/torre2.png?raw=true"
+    },
+{
+        "nome": "Torre do Mago",
+        "descricao": "Movimento de apenas um quadrado na vertical ou horizontal. Todos os aliados num raio de 2 quadrados ganham uma carta de Torre.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/torredomago1.png?raw=true"
+    },
+{
+        "nome": "Vampiro",
+        "descricao": "Se for de noite, movimenta o quanto quiser em qualquer direção. Essa carta é inútil durante o dia.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/vampiro1.png?raw=true"
+    },
+{
+        "nome": "Viajante",
+        "descricao": "Movimento livre até qualquer espaço fisicamente alcançável.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/viajante1.png?raw=true"
+    },
+{
+        "nome": "Vingador",
+        "descricao": "Pode se mover para o espaço adjacente a um aliado que tenha morrido ou caído na última rodada.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/vingador2.png?raw=true"
+    },
+{
+        "nome": "Vingador",
+        "descricao": "Pode se mover para o espaço adjacente a um aliado que tenha morrido ou caído na última rodada.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/vingador2.png?raw=true"
+    },
+{
+        "nome": "Zebra",
+        "descricao": "Movimento em forma de L, formado por 5 quadrados, três retos e dois para a direita ou a esquerda.",
+        "imagem": "https://github.com/AndreLopes132/1202card/blob/main/zebra1.png?raw=true"
+    },
+
+]
+
+BASE_B = {
+    # CANALIZAÇÃO
+    1: [
+
+        # CURA
+
+        {
+            "nome": "CURA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_cr.png?raw=true"
+        },
+
+        # DEFESA
+
+        {
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_de.png?raw=true"
+        },
+
+        # ASSISTÊNCIA
+
+        {
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_as.png?raw=true"
+        },
+
+        # DANO
+
+        {
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CANALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/canal_dn.png?raw=true"
+        },
+
+    ],
+
+    # CURA
+    2: [
+
+    # CURA
+
+        {
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+{
+            "nome": "CURA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_cr.png?raw=true"
+        },
+
+    # DEFESA
+
+        {
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_de.png?raw=true"
+        },
+
+    # ASSISTÊNCIA
+
+        {
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_as.png?raw=true"
+        },
+
+    # DANO
+
+        {
+            "nome": "DANO CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_dn.png?raw=true"
+        },
+{
+            "nome": "DANO CURA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/cura_dn.png?raw=true"
+        },
+
+    ],
+
+    # IMPERIAL
+    3: [
+
+        # CURA
+
+        {
+            "nome": "CURA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_cr.png?raw=true"
+        },
+{
+            "nome": "CURA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_cr.png?raw=true"
+        },
+{
+            "nome": "CURA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_cr.png?raw=true"
+        },
+{
+            "nome": "CURA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_cr.png?raw=true"
+        },
+{
+            "nome": "CURA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_cr.png?raw=true"
+        },
+
+    # DEFESA
+
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_de.png?raw=true"
+        },
+
+    # ASSISTÊNCIA
+
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_as.png?raw=true"
+        },
+
+    # DANO
+
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO IMPERIAL",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/imp_dn.png?raw=true"
+        },
+
+    ],
+
+    # MATERIALIZAÇÃO
+    4: [
+
+    # CURA
+
+        {
+            "nome": "CURA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_cr.png?raw=true"
+        },
+{
+            "nome": "CURA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_cr.png?raw=true"
+        },
+{
+            "nome": "CURA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_cr.png?raw=true"
+        },
+{
+            "nome": "CURA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_cr.png?raw=true"
+        },
+{
+            "nome": "CURA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_cr.png?raw=true"
+        },
+
+    # DEFESA
+
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_de.png?raw=true"
+        },
+
+    # ASSISTÊNCIA
+
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_as.png?raw=true"
+        },
+
+    # DANO
+
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+{
+            "nome": "DANO MATERIALIZAÇÃO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/mat_dn.png?raw=true"
+        },
+
+    ],
+
+    # NICTOMANCIA
+    5: [
+
+    # CURA
+
+        {
+            "nome": "CURA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_cr.png?raw=true"
+        },
+{
+            "nome": "CURA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_cr.png?raw=true"
+        },
+{
+            "nome": "CURA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_cr.png?raw=true"
+        },
+{
+            "nome": "CURA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_cr.png?raw=true"
+        },
+{
+            "nome": "CURA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_cr.png?raw=true"
+        },
+
+    # DEFESA
+
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_de.png?raw=true"
+        },
+
+    # ASSISTÊNCIA
+
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_as.png?raw=true"
+        },
+
+    # DANO
+
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+{
+            "nome": "DANO NICTOMANCIA",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/nic_dn.png?raw=true"
+        },
+
+    ],
+
+    # ONIRISMO
+    6: [
+
+    # CURA
+
+        {
+            "nome": "CURA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_cr.png?raw=true"
+        },
+{
+            "nome": "CURA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_cr.png?raw=true"
+        },
+{
+            "nome": "CURA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_cr.png?raw=true"
+        },
+{
+            "nome": "CURA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_cr.png?raw=true"
+        },
+{
+            "nome": "CURA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_cr.png?raw=true"
+        },
+
+    # DEFESA
+
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_de.png?raw=true"
+        },
+
+    # ASSISTÊNCIA
+
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_as.png?raw=true"
+        },
+
+    # DANO
+
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+{
+            "nome": "DANO ONIRISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/oni_dn.png?raw=true"
+        },
+
+    ],
+
+    # SIMPATISMO
+    7: [
+
+    # CURA
+
+        {
+            "nome": "CURA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_cr.png?raw=true"
+        },
+{
+            "nome": "CURA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_cr.png?raw=true"
+        },
+{
+            "nome": "CURA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_cr.png?raw=true"
+        },
+{
+            "nome": "CURA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_cr.png?raw=true"
+        },
+{
+            "nome": "CURA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_cr.png?raw=true"
+        },
+
+    # DEFESA
+
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_de.png?raw=true"
+        },
+
+    # ASSISTÊNCIA
+
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_as.png?raw=true"
+        },
+
+    # DANO
+
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+{
+            "nome": "DANO SIMPATISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/simp_dn.png?raw=true"
+        },
+
+    ],
+
+    # WIT
+    8: [
+
+    # CURA
+
+        {
+            "nome": "CURA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_cr.png?raw=true"
+        },
+{
+            "nome": "CURA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_cr.png?raw=true"
+        },
+{
+            "nome": "CURA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_cr.png?raw=true"
+        },
+{
+            "nome": "CURA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_cr.png?raw=true"
+        },
+{
+            "nome": "CURA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_cr.png?raw=true"
+        },
+
+    # DEFESSA
+
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_de.png?raw=true"
+        },
+
+    # ASSISTÊNCIA
+
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_as.png?raw=true"
+        },
+
+    # DANO
+
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+{
+            "nome": "DANO WIT",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/wit_dn.png?raw=true"
+        },
+
+    ],
+
+    # YLERISMO
+    9: [
+
+    # CURA
+
+        {
+            "nome": "CURA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_cr.png?raw=true"
+        },
+{
+            "nome": "CURA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_cr.png?raw=true"
+        },
+{
+            "nome": "CURA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_cr.png?raw=true"
+        },
+{
+            "nome": "CURA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_cr.png?raw=true"
+        },
+{
+            "nome": "CURA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_cr.png?raw=true"
+        },
+
+    # DEFESA
+
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+{
+            "nome": "DEFESA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_de.png?raw=true"
+        },
+
+    # ASSISTÊNCIA
+
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+{
+            "nome": "ASSISTÊNCIA YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_as.png?raw=true"
+        },
+
+    # DANO
+
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+{
+            "nome": "DANO YLERISMO",
+            "descricao": "DESCRIÇÃO.",
+            "imagem": "https://github.com/AndreLopes132/1202card/blob/main/yler_dn.png?raw=true"
+        },
+
+    ]
+}
+
+# =====================
+# CRIAÇÃO DE CARTAS
+# =====================
+def criar_cartas_A():
+    cartas = []
+
+    for carta_base in BASE_A:
+        carta = {
+            "id": str(uuid.uuid4()),
+            "tipo": "A",
+            "nome": carta_base["nome"],
+            "descricao": carta_base["descricao"],
+            "imagem": carta_base["imagem"]
+        }
+
+        cartas.append(carta)
+
+    random.shuffle(cartas)
+    return cartas
+
+
+
+
+def criar_cartas_B():
+    cartas = {}
+
+    for classe, lista_cartas in BASE_B.items():
+        cartas[classe] = []
+
+        for carta_base in lista_cartas:
+            carta = {
+                "id": str(uuid.uuid4()),
+                "tipo": "B",
+                "classe": classe,
+                "nome": carta_base["nome"],
+                "descricao": carta_base["descricao"],
+                "imagem": carta_base["imagem"]
+            }
+
+            cartas[classe].append(carta)
+
+        random.shuffle(cartas[classe])
+
+    return cartas
+
+
+# =====================
+# ESTADO
+# =====================
+if "deck_A" not in st.session_state:
+    st.session_state.deck_A = criar_cartas_A()
+
+if "deck_B" not in st.session_state:
+    st.session_state.deck_B = criar_cartas_B()
+
+if "descarte_A" not in st.session_state:
+    st.session_state.descarte_A = []
+
+if "descarte_B" not in st.session_state:
+    st.session_state.descarte_B = {c: [] for c in CLASSES}
+
+if "mao" not in st.session_state:
+    st.session_state.mao = {"A": [], "B": []}
+
+# =====================
+# FUNÇÕES DE COMPRA
+# =====================
+def comprar_A():
+    if not st.session_state.deck_A:
+        st.session_state.deck_A = st.session_state.descarte_A.copy()
+        st.session_state.descarte_A.clear()
+        random.shuffle(st.session_state.deck_A)
+    return st.session_state.deck_A.pop() if st.session_state.deck_A else None
+
+def comprar_B(classe):
+    if not st.session_state.deck_B[classe]:
+        st.session_state.deck_B[classe] = st.session_state.descarte_B[classe].copy()
+        st.session_state.descarte_B[classe].clear()
+        random.shuffle(st.session_state.deck_B[classe])
+    return st.session_state.deck_B[classe].pop() if st.session_state.deck_B[classe] else None
+
+def repor_mao_A():
+    while len([
+        c for c in st.session_state.mao["A"]
+        if not c.get("extra") and not c.get("bonus")
+    ]) < LIMITE["A"]:
+        carta = comprar_A()
+        if carta:
+            st.session_state.mao["A"].append(carta)
+
+def repor_mao_B():
+    classe_jogador = st.session_state.classe
+
+    pool = set(POOL_FIXO)
+    if classe_jogador not in pool:
+        pool.add(classe_jogador)
+
+    # primeiro repõe até o limite normal
+    while len([
+        c for c in st.session_state.mao["B"]
+        if not c.get("extra") and not c.get("bonus")
+    ]) < LIMITE["B"]:
+
+        classe = random.choice(list(pool))
+        carta = comprar_B(classe)
+        if carta:
+            st.session_state.mao["B"].append(carta)
+
+    # depois garante que existe pelo menos 1 da classe
+    tem_classe = any(
+        c["classe"] == classe_jogador
+        and not c.get("extra")
+        and not c.get("bonus")
+        for c in st.session_state.mao["B"]
+    )
+
+    if not tem_classe:
+        carta = comprar_B(classe_jogador)
+        if carta:
+            # remove uma carta aleatória normal para manter limite
+            for c in st.session_state.mao["B"]:
+                if not c.get("extra") and not c.get("bonus"):
+                    st.session_state.mao["B"].remove(c)
+                    st.session_state.descarte_B[c["classe"]].append(c)
+                    break
+
+            st.session_state.mao["B"].append(carta)
+
+
+def repor_uma_A():
+    carta = comprar_A()
+    if carta:
+        st.session_state.mao["A"].append(carta)
+
+
+def repor_uma_B(carta_descartada):
+    classe_jogador = st.session_state.classe
+
+    # Se descartou carta da própria classe → repor da mesma classe
+    if carta_descartada["classe"] == classe_jogador:
+        carta = comprar_B(classe_jogador)
+        if carta:
+            st.session_state.mao["B"].append(carta)
+        return
+
+    # Caso contrário → repor aleatória do pool
+    pool = set(POOL_FIXO)
+    if classe_jogador not in pool:
+        pool.add(classe_jogador)
+
+    classe = random.choice(list(pool))
+    carta = comprar_B(classe)
+
+    if carta:
+        st.session_state.mao["B"].append(carta)
+
+
+
+
+def adicionar_carta_extra(tipo):
+    if tipo == "A":
+        carta = comprar_A()
+        if carta:
+            carta["extra"] = True
+            st.session_state.mao["A"].append(carta)
+    else:
+        carta = comprar_B(st.session_state.classe)
+        if carta:
+            carta["extra"] = True
+            st.session_state.mao["B"].append(carta)
+
+def adicionar_carta_bonus(tipo):
+    if tipo == "A":
+        carta = comprar_A()
+        if carta:
+            carta["bonus"] = True
+            st.session_state.mao["A"].append(carta)
+    else:
+        carta = comprar_B(st.session_state.classe)
+        if carta:
+            carta["bonus"] = True
+            st.session_state.mao["B"].append(carta)
+
+
+
+# =====================
+# SETUP INICIAL
+# =====================
+if "iniciado" not in st.session_state:
+
+    st.title("Configuração Inicial")
+
+    nivel = st.number_input("Nível", 1, NIVEL_MAX, 1)
+    vida = st.number_input("Vida Máxima", 1, value=10)
+
+    classe_escolhida = st.radio(
+        "Escolha sua Classe:",
+        options=list(CLASSES.keys()),
+        format_func=lambda x: f"{x} — {CLASSES[x]}"
+    )
+
+    if st.button("Iniciar Jogo"):
+        st.session_state.nivel = nivel
+        st.session_state.vida_max = vida
+        st.session_state.vida_atual = vida
+        st.session_state.vida_bonus = 0
+        st.session_state.classe = classe_escolhida
+        st.session_state.possui_bonus = False
+        st.session_state.bonus_tipo = None
+        repor_mao_A()
+        repor_mao_B()
+        st.session_state.iniciado = True
+        st.rerun()
+
+# =====================
+# JOGO
+# =====================
+else:
+
+    st.title(f"Classe: {CLASSES[st.session_state.classe]}")
+
+    st.divider()
+
+    # AÇÕES ESPECIAIS
+    st.subheader("Ações Especiais")
+    col1, col2 = st.columns(2)
+
+    # EXTRA (agora só botão)
+    with col1:
+        if st.button("Adicionar Carta Extra"):
+            st.session_state.mostrando_extra = True
+
+        if st.session_state.get("mostrando_extra"):
+            colA, colB = st.columns(2)
+
+            if colA.button("Movimento"):
+                adicionar_carta_extra("A")
+                st.session_state.mostrando_extra = False
+                st.rerun()
+
+            if colB.button("Ação"):
+                adicionar_carta_extra("B")
+                st.session_state.mostrando_extra = False
+                st.rerun()
+
+    # BONUS (agora só botão)
+    with col2:
+        if not st.session_state.possui_bonus:
+
+            if st.button("Adicionar Carta Bônus"):
+                st.session_state.mostrando_bonus = True
+
+            if st.session_state.get("mostrando_bonus"):
+                colA, colB = st.columns(2)
+
+                if colA.button("Movimento"):
+                    adicionar_carta_bonus("A")
+                    st.session_state.possui_bonus = True
+                    st.session_state.bonus_tipo = "A"
+                    st.session_state.mostrando_bonus = False
+                    st.rerun()
+
+                if colB.button("Ação"):
+                    adicionar_carta_bonus("B")
+                    st.session_state.possui_bonus = True
+                    st.session_state.bonus_tipo = "B"
+                    st.session_state.mostrando_bonus = False
+                    st.rerun()
+
+        else:
+            st.success("Carta Bônus ativa")
+
+            if st.button("Remover Carta Bônus"):
+                st.session_state.possui_bonus = False
+                st.session_state.bonus_tipo = None
+
+                for tipo in ["A", "B"]:
+                    st.session_state.mao[tipo] = [
+                        c for c in st.session_state.mao[tipo]
+                        if not c.get("bonus")
+                    ]
+
+                st.rerun()
+
+    st.divider()
+
+    # =====================
+    # RENDER
+    # =====================
+    def render(tipo):
+
+        titulo = "Cartas de Movimento" if tipo == "A" else "Cartas de Ação"
+        st.subheader(titulo)
+
+        if not st.session_state.mao[tipo]:
+            st.info("Nenhuma carta disponível.")
+            return
+
+        cols = st.columns(len(st.session_state.mao[tipo]))
+
+        for carta, col in zip(st.session_state.mao[tipo], cols):
+            with col:
+
+                key = carta["id"]
+
+                if key not in st.session_state:
+                    st.session_state[key] = False
+
+                nome = carta["nome"]
+
+                if carta.get("extra"):
+                    nome = f"✨ EXTRA — {nome}"
+
+                if carta.get("bonus"):
+                    nome = f"🔷 BÔNUS — {nome}"
+
+                if st.button(nome, key=f"btn_{key}", use_container_width=True):
+                    st.session_state[key] = not st.session_state[key]
+
+                st.image(carta["imagem"], use_container_width=True)
+
+                if st.session_state[key]:
+
+                    st.write(carta["descricao"].replace(
+                        "NIVEL", str(st.session_state.nivel)
+                    ))
+
+                    col1, col2 = st.columns(2)
+
+                    # JOGAR (não repõe)
+                    # JOGAR
+                    with col1:
+                        if st.button("▶ Jogar", key=f"use_{key}"):
+
+                            st.session_state.mao[tipo].remove(carta)
+
+                            if tipo == "A":
+                                st.session_state.descarte_A.append(carta)
+                            else:
+                                st.session_state.descarte_B[carta["classe"]].append(carta)
+
+                            st.session_state[key] = False
+                            st.rerun()
+
+                    # DESCARTAR (repõe apenas 1 carta normal)
+                    with col2:
+                        if st.button("🗑 Descartar", key=f"discard_{key}"):
+
+                            st.session_state.mao[tipo].remove(carta)
+
+                            if tipo == "A":
+                                st.session_state.descarte_A.append(carta)
+
+                                if not carta.get("extra") and not carta.get("bonus"):
+                                    repor_uma_A()
+
+                            else:
+
+                                st.session_state.descarte_B[carta["classe"]].append(carta)
+
+                                if not carta.get("extra") and not carta.get("bonus"):
+                                    repor_uma_B(carta)
+
+                            st.session_state[key] = False
+                            st.rerun()
+
+    render("A")
+    st.divider()
+    render("B")
+
+    st.divider()
+
+    # 🔄 NOVO TURNO AGORA FICA NO FINAL
+    if st.button("🔄 Iniciar Novo Turno"):
+
+        repor_mao_A()
+        repor_mao_B()
+
+        # Repor bônus se necessário
+        if st.session_state.possui_bonus:
+            tipo = st.session_state.bonus_tipo
+
+            ja_tem_bonus = any(
+                c.get("bonus") for c in st.session_state.mao[tipo]
+            )
+
+            if not ja_tem_bonus:
+                adicionar_carta_bonus(tipo)
+
+        st.rerun()
+        
+
