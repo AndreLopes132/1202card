@@ -1,0 +1,160 @@
+import streamlit as st
+
+# ----------------------------
+# CONFIG
+# ----------------------------
+GRID_SIZE = 12
+EMPTY = 0
+OBSTACLE = 1
+OBSERVER = 2
+
+# ----------------------------
+# INIT
+# ----------------------------
+if "grid" not in st.session_state:
+    st.session_state.grid = [
+        [EMPTY for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)
+    ]
+    st.session_state.observer = None
+    st.session_state.modo = "obstaculo"
+
+grid = st.session_state.grid
+
+
+# ----------------------------
+# BRESENHAM
+# ----------------------------
+def linha(x0, y0, x1, y1):
+    pontos = []
+    dx = abs(x1 - x0)
+    dy = abs(y1 - y0)
+    x, y = x0, y0
+    sx = -1 if x0 > x1 else 1
+    sy = -1 if y0 > y1 else 1
+
+    if dx > dy:
+        err = dx / 2
+        while x != x1:
+            pontos.append((x, y))
+            err -= dy
+            if err < 0:
+                y += sy
+                err += dx
+            x += sx
+    else:
+        err = dy / 2
+        while y != y1:
+            pontos.append((x, y))
+            err -= dx
+            if err < 0:
+                x += sx
+                err += dy
+            y += sy
+
+    pontos.append((x1, y1))
+    return pontos
+
+
+# ----------------------------
+# CALCULAR VISÃO (separado!)
+# ----------------------------
+def calcular_visao():
+
+    visivel = [
+        [False for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)
+    ]
+
+    if st.session_state.observer is None:
+        return visivel
+
+    ox, oy = st.session_state.observer
+
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
+
+            if grid[x][y] == OBSTACLE:
+                continue
+
+            caminho = linha(ox, oy, x, y)
+
+            bloqueado = False
+            for px, py in caminho[1:-1]:
+                if grid[px][py] == OBSTACLE:
+                    bloqueado = True
+                    break
+
+            if not bloqueado:
+                visivel[x][y] = True
+
+    return visivel
+
+
+# ----------------------------
+# CLICK
+# ----------------------------
+def clicar(x, y):
+
+    if st.session_state.modo == "obstaculo":
+
+        # não permite colocar obstáculo no observador
+        if st.session_state.observer == (x, y):
+            return
+
+        if grid[x][y] == EMPTY:
+            grid[x][y] = OBSTACLE
+        elif grid[x][y] == OBSTACLE:
+            grid[x][y] = EMPTY
+
+    elif st.session_state.modo == "observador":
+
+        st.session_state.observer = (x, y)
+
+    st.rerun()
+
+
+# ----------------------------
+# UI
+# ----------------------------
+st.title("🔍 Simulador de Linha de Visão")
+
+col1, col2 = st.columns(2)
+
+if col1.button("🧱 Modo Obstáculo"):
+    st.session_state.modo = "obstaculo"
+
+if col2.button("👁️ Modo Observador"):
+    st.session_state.modo = "observador"
+
+st.write(f"Modo atual: **{st.session_state.modo}**")
+
+visivel = calcular_visao()
+
+st.write("---")
+
+for i in range(GRID_SIZE):
+    cols = st.columns(GRID_SIZE)
+    for j in range(GRID_SIZE):
+
+        if st.session_state.observer == (i, j):
+            label = "🟥"
+
+        elif grid[i][j] == OBSTACLE:
+            label = "⬛"
+
+        elif visivel[i][j]:
+            label = "🟩"
+
+        else:
+            label = "⬜"
+
+        if cols[j].button(label, key=f"{i}-{j}"):
+            clicar(i, j)
+
+st.write("---")
+
+if st.button("🔄 Resetar"):
+    st.session_state.grid = [
+        [EMPTY for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)
+    ]
+    st.session_state.observer = None
+    st.rerun()
