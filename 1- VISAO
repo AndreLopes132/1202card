@@ -105,9 +105,18 @@ def clicar(x, y):
         elif grid[x][y] == OBSTACLE:
             grid[x][y] = EMPTY
 
+
     elif st.session_state.modo == "observador":
 
-        st.session_state.observer = (x, y)
+        # Se clicar no mesmo local do observador, remove ele
+
+        if st.session_state.observer == (x, y):
+
+            st.session_state.observer = None
+
+        else:
+
+            st.session_state.observer = (x, y)
 
     st.rerun()
 
