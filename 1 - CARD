@@ -2,7 +2,13 @@ import streamlit as st
 import random
 import uuid
 
+
+
 st.set_page_config(layout="wide")
+
+# GARANTE QUE iniciado SEMPRE EXISTE
+if "iniciado" not in st.session_state:
+    st.session_state.iniciado = False
 
 # =====================
 # CONFIG
@@ -2992,6 +2998,24 @@ def criar_cartas_B():
 
     return cartas
 
+def inicializar_estado():
+    defaults = {
+        "deck_A": criar_cartas_A(),
+        "deck_B": criar_cartas_B(),
+        "descarte_A": [],
+        "descarte_B": {c: [] for c in CLASSES},
+        "mao": {"A": [], "B": []},
+        "vida_atual": 0,
+        "vida_bonus": 0,
+        "possui_bonus": False,
+        "bonus_tipo": None,
+    }
+
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
+
+inicializar_estado()
 
 # =====================
 # ESTADO
@@ -3135,7 +3159,7 @@ def adicionar_carta_bonus(tipo):
 # =====================
 # SETUP INICIAL
 # =====================
-if "iniciado" not in st.session_state:
+if not st.session_state.iniciado:
 
     st.title("Configuração Inicial")
 
