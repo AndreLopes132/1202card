@@ -30,6 +30,21 @@ CLASSES = {
 
 POOL_FIXO = {1, 3, 4, 7, 9}
 
+TIPOS_DANO = [
+    "Cortante 🔪",
+    "Perfurante 🔱",
+    "Contundente 🔨",
+    "Gelo 🧊",
+    "Fogo 🔥",
+    "Ácido 🧪",
+    "Elétrico ⚡",
+    "Trovejante 🔊",
+    "Radiante 🌕",
+    "Necrótico 🌑",
+    "Psíquico 🧠",
+    "Força 💥"
+]
+
 # =====================
 # CARTAS BASE
 # =====================
@@ -3182,6 +3197,11 @@ if not st.session_state.iniciado:
         st.session_state.bonus_tipo = None
         repor_mao_A()
         repor_mao_B()
+        tipos_escolhidos = random.sample(TIPOS_DANO, 3)
+
+        st.session_state.fraqueza = tipos_escolhidos[0]
+        st.session_state.resistencia = tipos_escolhidos[1]
+        st.session_state.imunidade = tipos_escolhidos[2]
         st.session_state.iniciado = True
         st.rerun()
 
@@ -3217,6 +3237,12 @@ else:
         step=1,
         format="%d"
     )
+
+    st.subheader("Afinidades")
+
+    st.write(f"🔥 Fraqueza: {st.session_state.fraqueza}")
+    st.write(f"🛡️ Resistência: {st.session_state.resistencia}")
+    st.write(f"🚫 Imunidade: {st.session_state.imunidade}")
 
     st.divider()
 
